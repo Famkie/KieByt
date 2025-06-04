@@ -1,6 +1,6 @@
 import { REST, Routes } from 'discord.js';
 import { readdir } from 'fs/promises';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 export async function deploySlashCommands(client) {
   const commands = [];
