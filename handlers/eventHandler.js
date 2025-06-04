@@ -1,28 +1,27 @@
-import { readdir } from 'fs/promises';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 export async function loadEvents(client) {
-  const eventFolders = ['../events/client', '../events/guild'];
-
-  for (const folder of eventFolders) {
-    const files = await readdir(folder);
-
-    for (const file of files) {
-      if (!file.endsWith('.js')) continue;
-      const event = (await import(`${folder}/${file}`)).default;
-
-      if (!event || !event.name || typeof event.execute !== 'function') {
-        logger.warn(`[EVENT] Invalid event file: ${file}`);
-        continue;
-      }
-
-      if (event.once) {
-        client.once(event.name, (...args) => event.execute(...args, client));
+  try {
+    // Misal di folder events/client ada file event
+    const eventFiles = ['ready.js', 'messageCreate.js', 'error.js']; // contoh
+    for (const file of eventFiles) {
+      const event = await import(`../events/client/${file}`);
+      const eventName = file.split('.')[0];
+      if (event.default.once) {
+        client.once(eventName, (...args) => event.default.execute(client, ...args));
       } else {
-        client.on(event.name, (...args) => event.execute(...args, client));
+        client.on(eventName, (...args) => {
+          try {
+            event.default.execute(client, ...args);
+          } catch (err) {
+            logger.error(`Event error on ${eventName}: ${err.message}`);
+          }
+        });
       }
-
-      logger.info(`[EVENT] Loaded ${event.name} from ${file}`);
+      logger.info(`Loaded event: ${eventName}`);
     }
+  } catch (err) {
+    logger.error(`Failed to load events: ${err.message}`);
+    throw err; // Biar index.js tau ada error fatal
   }
-} 
+}
