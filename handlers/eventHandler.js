@@ -1,11 +1,17 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import logger from '../utils/logger.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export async function loadEvents(client) {
   try {
-    // Misal di folder events/client ada file event
     const eventFiles = ['ready.js', 'messageCreate.js', 'error.js']; // contoh
     for (const file of eventFiles) {
-      const event = await import(`../events/client/${file}`);
+      const filePath = path.join(__dirname, '..', 'events', 'client', file);
+      // Pakai import dengan file:// + absolute path
+      const event = await import(`file://${filePath}`);
       const eventName = file.split('.')[0];
       if (event.default.once) {
         client.once(eventName, (...args) => event.default.execute(client, ...args));
@@ -22,6 +28,6 @@ export async function loadEvents(client) {
     }
   } catch (err) {
     logger.error(`Failed to load events: ${err.message}`);
-    throw err; // Biar index.js tau ada error fatal
+    throw err;
   }
 }
