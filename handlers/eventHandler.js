@@ -2,7 +2,7 @@ import { readdir } from 'fs/promises';
 import { logger } from '../utils/logger.js';
 
 export async function loadEvents(client) {
-  const eventFolders = ['./events/client', './events/guild'];
+  const eventFolders = ['../events/client', '../events/guild'];
 
   for (const folder of eventFolders) {
     const files = await readdir(folder);
