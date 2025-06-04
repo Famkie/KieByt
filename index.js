@@ -5,9 +5,10 @@ import { loadSlashCommands } from './handlers/slashCommandHandler.js';
 import { loadPrefixCommands } from './handlers/prefixCommandHandler.js';
 import { deploySlashCommands } from './deploy/deploySlash.js';
 import { keepAlive } from './keepAlive.js';
-import logger from './utils/logger.js';  // <-- perbaikan import
+import logger from './utils/logger.js';
 
-config(); // Load .env variables
+config(); // Load .env
+
 keepAlive();
 
 const client = new Client({
@@ -27,28 +28,27 @@ const client = new Client({
   ],
 });
 
+// Collections buat commands dll
 client.slashCommands = new Collection();
 client.prefixCommands = new Collection();
 client.aliases = new Collection();
 client.cooldowns = new Collection();
 
 (async () => {
-  client.config = (await import('./config/config.js')).default;
-
-  logger.info('🟡 Starting up KieBot...');
-
-  // Handler setup
-  await loadEvents(client);
-  await loadSlashCommands(client);
-  await loadPrefixCommands(client);
-  await deploySlashCommands(client); // Optional: Slash command deploy
-
-  // Start bot
   try {
+    client.config = (await import('./config/config.js')).default;
+
+    logger.info('🟡 Starting up KieBot...');
+
+    await loadEvents(client);
+    await loadSlashCommands(client);
+    await loadPrefixCommands(client);
+    await deploySlashCommands(client);
+
     await client.login(process.env.TOKEN);
     logger.info('🟢 Bot logged in successfully.');
-  } catch (err) {
-    logger.error(`🔴 Failed to login: ${err.message}`);
+  } catch (error) {
+    logger.error(`🔴 Failed to start bot: ${error.message}`);
     process.exit(1);
   }
 })();
