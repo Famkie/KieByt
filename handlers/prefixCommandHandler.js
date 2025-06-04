@@ -1,6 +1,6 @@
 import { readdir } from 'fs/promises';
 import path from 'path';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 export async function loadPrefixCommands(client) {
   const commandPath = './commands/prefix';
